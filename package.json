@@ -4,7 +4,10 @@
   "type": "module",
   "description": "Checks a Steam wishlist against Xbox Game Pass so you don't buy games that are coming to Game Pass.",
   "scripts": {
-    "check": "node src/main.js"
+    "check": "node --env-file-if-exists=.env src/main.js",
+    "dashboard": "node --env-file-if-exists=.env src/main.js && start \"\" site\\index.html"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=22"
+  }
 }
