@@ -38,7 +38,7 @@ Keys are Steam app IDs. A value of `null` means "never match", and an Xbox produ
    - New secret `EMAIL_TO` = the address you signed up to Resend with
 
    Use **Secrets**, not Variables: Actions logs on a public repo are visible to anyone, and only secrets are masked there.
-6. Open **Actions → Game Pass check → Run workflow** to run it now. After that it runs daily at 14:00 UTC.
+6. Open **Actions → Game Pass check → Run workflow** to run it now. After that it runs daily at 7pm New York time (adjusting for daylight saving).
 
 The dashboard will be at `https://<your-github-username>.github.io/gamepass-wishlist/`.
 

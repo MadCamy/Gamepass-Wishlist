@@ -2,7 +2,10 @@ name: Game Pass check
 
 on:
   schedule:
-    - cron: '0 14 * * *' # daily, 14:00 UTC
+    # 7pm New York time. Cron is UTC-only, so both offsets are scheduled and the
+    # gate job below keeps whichever matches daylight saving time today.
+    - cron: '0 23 * * *' # 7pm EDT (summer)
+    - cron: '0 0 * * *' # 7pm EST (winter)
   workflow_dispatch: # "Run workflow" button for manual runs
 
 # Nothing by default; each job asks for only what it needs.
@@ -13,8 +16,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.tz.outputs.run }}
+    steps:
+      - id: tz
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          zone=$(TZ=America/New_York date +%Z)
+          if [ -z "$SCHEDULE" ] \
+            || { [ "$SCHEDULE" = '0 23 * * *' ] && [ "$zone" = EDT ]; } \
+            || { [ "$SCHEDULE" = '0 0 * * *' ] && [ "$zone" = EST ]; }; then
+            echo run=true >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping: this slot isn't 7pm New York time while on $zone"
+            echo run=false >> "$GITHUB_OUTPUT"
+          fi
+
   # Holds the secrets, but can only read the repo: no deploy or token permissions.
   check:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
