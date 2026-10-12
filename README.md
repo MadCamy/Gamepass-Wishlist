@@ -33,8 +33,8 @@ Keys are Steam app IDs. A value of `null` means "never match", and an Xbox produ
 3. **Create a public GitHub repo** (e.g. `gamepass-wishlist`) and push this folder to it.
 4. In the repo, open **Settings → Pages** and set **Source** to **GitHub Actions**.
 5. In **Settings → Secrets and variables → Actions**:
-   - New secret `RESEND_API_KEY` = your Resend key
-   - New secret `STEAM_PROFILE` = your Steam profile URL
+   - New secret `RESEND` = your Resend API key
+   - New secret `STEAM` = your Steam profile URL
    - New secret `EMAIL_TO` = the address you signed up to Resend with
 
    Use **Secrets**, not Variables: Actions logs on a public repo are visible to anyone, and only secrets are masked there.
