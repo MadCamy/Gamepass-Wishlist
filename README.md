@@ -34,7 +34,7 @@ Keys are Steam app IDs. A value of `null` means "never match", and an Xbox produ
 4. In the repo, open **Settings → Pages** and set **Source** to **GitHub Actions**.
 5. In **Settings → Secrets and variables → Actions**:
    - New secret `RESEND` = your Resend API key
-   - New secret `STEAM` = your Steam profile URL
+   - New secret `STEAM` = your 17-digit SteamID64 (a profile URL also works locally, but Steam often blocks the lookup from GitHub servers)
    - New secret `EMAIL_TO` = the address you signed up to Resend with
 
    Use **Secrets**, not Variables: Actions logs on a public repo are visible to anyone, and only secrets are masked there.
