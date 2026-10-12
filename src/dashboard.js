@@ -5,6 +5,9 @@ import { STATUS } from './report.js';
 const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
+// Only allow http(s) links, so a bad URL from a feed can never become a javascript: link.
+const safeUrl = (u) => (/^https?:\/\//i.test(String(u ?? "")) ? u : "#");
+
 const SECTIONS = [
   { status: 'coming', blurb: 'Wait. These are on their way to Game Pass.' },
   { status: 'onGamePass', blurb: 'Already included with your Ultimate subscription.' },
@@ -20,16 +23,16 @@ function card(g) {
   if (g.confidence === 'fuzzy') tags.push(`<span class="tag" title="Matched to “${esc(g.xbox.title)}”">Likely match</span>`);
   if (g.xbox && !g.xbox.onPc && g.status === 'onGamePass') tags.push('<span class="tag">Console / cloud</span>');
 
-  const links = [`<a href="${esc(g.url)}">Steam</a>`];
-  if (g.xbox) links.push(`<a href="${esc(g.xbox.url)}">Xbox store</a>`);
-  for (const m of g.mentions.slice(0, 2)) links.push(`<a href="${esc(m.link)}" title="${esc(m.title)}">Xbox Wire, ${esc(m.date)}</a>`);
+  const links = [`<a href="${esc(safeUrl(g.url))}">Steam</a>`];
+  if (g.xbox) links.push(`<a href="${esc(safeUrl(g.xbox.url))}">Xbox store</a>`);
+  for (const m of g.mentions.slice(0, 2)) links.push(`<a href="${esc(safeUrl(m.link))}" title="${esc(m.title)}">Xbox Wire, ${esc(m.date)}</a>`);
 
   const date = g.status === 'coming' && g.xbox?.releaseDate > new Date().toISOString().slice(0, 10)
     ? `Launches ${esc(g.xbox.releaseDate)}`
     : g.releaseDate ? `Released ${esc(g.releaseDate)}` : '';
 
   return `<article class="card" data-name="${esc(g.name.toLowerCase())}">
-  ${g.image ? `<img src="${esc(g.image)}" alt="" loading="lazy">` : '<div class="noimg"></div>'}
+  ${g.image ? `<img src="${esc(safeUrl(g.image))}" alt="" loading="lazy">` : '<div class="noimg"></div>'}
   <div class="body">
     <h3>${esc(g.name)}</h3>
     <p class="meta"><span class="price">${esc(g.price ?? 'No price yet')}</span>${date ? ` · ${date}` : ''}</p>

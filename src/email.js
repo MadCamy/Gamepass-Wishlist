@@ -2,6 +2,9 @@
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
+// Only allow http(s) links, so a bad URL from a feed can never become a javascript: link.
+const safeUrl = (u) => (/^https?:\/\//i.test(String(u ?? "")) ? u : "#");
+
 const HEADINGS = {
   coming: 'Coming to Game Pass. Hold off on buying.',
   onGamePass: 'Now on Game Pass',
@@ -25,12 +28,12 @@ ${games
       .filter(Boolean)
       .join(' · ');
     const link = kind === 'mentioned' ? g.mentions[0]?.link : g.xbox?.url ?? g.url;
-    return `<li style="margin:4px 0"><a href="${esc(link)}">${esc(g.name)}</a>${detail ? ` <span style="color:#5d6468">(${esc(detail)})</span>` : ''}</li>`;
+    return `<li style="margin:4px 0"><a href="${esc(safeUrl(link))}">${esc(g.name)}</a>${detail ? ` <span style="color:#5d6468">(${esc(detail)})</span>` : ''}</li>`;
   })
   .join('\n')}</ul>`
   )
   .join('\n')}
-${siteUrl ? `<p style="margin-top:24px"><a href="${esc(siteUrl)}">Open the dashboard</a></p>` : ''}
+${siteUrl ? `<p style="margin-top:24px"><a href="${esc(safeUrl(siteUrl))}">Open the dashboard</a></p>` : ''}
 </div>`;
   const text = groups
     .map(([kind, games]) => `${HEADINGS[kind]}\n${games.map((g) => `- ${g.name}`).join('\n')}`)

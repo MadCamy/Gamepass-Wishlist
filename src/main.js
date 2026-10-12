@@ -60,5 +60,5 @@ if (changes.length && env.RESEND_API_KEY && env.EMAIL_TO) {
     from: env.EMAIL_FROM || 'Game Pass Watch <onboarding@resend.dev>',
     ...email,
   });
-  console.log(`Emailed ${env.EMAIL_TO}.`);
+  console.log('Email sent.');
 }
