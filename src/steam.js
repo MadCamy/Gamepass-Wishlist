@@ -7,11 +7,22 @@ const ASSET_BASE = 'https://shared.akamai.steamstatic.com/store_item_assets/';
 
 export async function resolveSteamId(profile) {
   if (/^\d{17}$/.test(profile)) return profile;
+  const numeric = profile.match(/steamcommunity\.com\/profiles\/(\d{17})/)?.[1];
+  if (numeric) return numeric;
   const vanity = profile.match(/steamcommunity\.com\/id\/([^/]+)/)?.[1] ?? profile;
-  const xml = await (await fetch(`https://steamcommunity.com/id/${encodeURIComponent(vanity)}/?xml=1`)).text();
-  const id = xml.match(/<steamID64>(\d{17})<\/steamID64>/)?.[1];
-  if (!id) throw new Error(`Could not resolve Steam profile "${profile}"`);
-  return id;
+  // steamcommunity.com sometimes throttles cloud IPs, so retry with a growing delay.
+  let lastStatus;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, attempt * 10_000));
+    const res = await fetch(`https://steamcommunity.com/id/${encodeURIComponent(vanity)}/?xml=1`);
+    lastStatus = res.status;
+    const id = (await res.text()).match(/<steamID64>(\d{17})<\/steamID64>/)?.[1];
+    if (id) return id;
+  }
+  throw new Error(
+    `Could not resolve Steam profile (last HTTP ${lastStatus}). ` +
+    'Setting the STEAM secret to your 17-digit SteamID64 skips this lookup entirely.'
+  );
 }
 
 export async function getWishlist(steamId) {
